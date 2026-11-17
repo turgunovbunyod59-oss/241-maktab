@@ -313,14 +313,17 @@ const JADVAL={
 
 /* ================= 5) KUTUBXONA =================
    Har bir sinf uchun O'zbek tili va Rus tili fanlari ro'yxati. Har qator = bitta fan:
-       ["kitob-kodi",  "Ekranda ko'rinadigan nomi"],
+       ["kitob-kodi",  "Ekranda ko'rinadigan nomi",  "Kitob PDF silkasi (ixtiyoriy)"],
    - Ikkinchi qiymat (nomi)ni xohlaganingizcha o'zgartiring.
    - Birinchi qiymat (kitob-kodi) — texnik kod. Faqat kichik lotin harflar, raqam va
-     chiziqcha (-) bo'lsin. Fanga PDF yuklagandan keyin kodni O'ZGARTIRMANG,
-     aks holda yuklangan PDF topilmay qoladi.
-   - Yangi fan qo'shish: qatorni nusxalab, KODINI yangi (shu ro'yxatda takrorlanmaydigan)
-     qiling va nomini yozing. Fanni olib tashlash: qatorni o'chiring.
-   - Har bir fan ichida o'zining "PDF kitob yuklash" tugmasi bor. */
+     chiziqcha (-) bo'lsin.
+   - Uchinchi qiymat (ixtiyoriy) — Kitob PDF faylining internetdagi silkasi (Google Drive, Telegram, Ziyonet va h.k.).
+     Masalan:
+       ["ona-tili",   "Ona tili",    "https://drive.google.com/file/d/1ABCxyz.../view"],
+     Agar silka qo'yilsa, saytda har bir fanning yonida "Kitobni ochish" tugmasi chiqadi,
+     bosganda to'g'ridan-to'g'ri kitob ochiladi va u HECH QACHON O'CHIB KETMAYDI!
+     Agar hozircha silka bo'lmasa, uchinchi qiymatni kiritmasangiz ham bo'ladi.
+   - Yangi fan qo'shish: qatorni nusxalab, KODINI yangi qiling va nomini yozing. */
 const KITOBLAR={
   5: {
     uz: [

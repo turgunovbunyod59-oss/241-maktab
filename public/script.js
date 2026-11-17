@@ -83,7 +83,7 @@ ${T.map((t,i)=>{const c=`<div class="tcell ci"><div class="tcircle-glow"><img sr
 const GRAD='<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="currentColor"/>';
 R.home=()=>`<div class="home">
 <section class="hero">${ph("img/maktab.jpg","hphoto","")}<div class="hin"><p class="kick"><svg viewBox="0 0 24 24" aria-hidden="true">${GRAD}</svg>${esc(S.kicker||"Bilim — kelajak kalitidir")}</p><h1>${esc(S.title1)}<span class="acc">${esc(S.title2)}</span></h1><p class="lead">“${S.quote[0]}<br>${S.quote[1]}”</p></div></section>
-<section class="chorak" aria-label="O'quv choragi hisoblagichi"><div class="chorak-hd"><svg class="chorak-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg><h2>O'quv choragi tugashiga qolgan vaqt</h2></div><div class="cd-watermark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div><div id="cd">${cdView()}</div></section>
+<section class="chorak" aria-label="O'quv choragi hisoblagichi"><div class="chorak-hd"><h2>O'quv choragi tugashiga qolgan vaqt</h2></div><div id="cd">${cdView()}</div></section>
 <nav class="menu" aria-label="Bo'limlar">${MENU.map(m=>`<button class="mcard" data-m="${m[0]}"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true">${m[2]}</svg></span><div class="mcard-txt"><b>${m[1]}</b><span class="d">${m[3]}</span></div><i class="ar"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></i></button>`).join("")}</nav>
 ${tarixHtml()}</div>
 <footer class="foot"><div class="foot-brand"><span class="lg"><img src="img/logo.png" alt="" onerror="this.remove()"></span><div class="foot-brand-txt"><b>Maktab rasmiy sayti</b><small>Bilim — kelajak kalitidir</small></div></div><span class="soc">${["ig","tg","fb"].map(k=>`<a class="${k}" href="${S[k]}" target="_blank" rel="noopener" aria-label="${k}"><svg viewBox="0 0 24 24">${ICON[k]}</svg></a>`).join("")}</span><span class="foot-copy">© 2025 241-sonli maktab. Barcha huquqlar himoyalangan.</span></footer>`;
@@ -259,19 +259,91 @@ INIT.yangiliklar=()=>{feedNw();
   $("#post").onclick=()=>{const n=$("#nm").value.trim(),t=$("#txt").value.trim(),m=$("#msg");if(!n||!t){m.textContent="Ism va xabarni yozing.";return}m.textContent="";
     askPin(async pin=>{try{const r=await jpost("/api/news",{pin,name:n,text:t});$("#nm").value="";$("#txt").value="";await feedNw()}catch(e){m.textContent=e.message}})}};
 
+const drivePreview=u=>{
+  if(!u)return"";
+  if(u.includes("drive.google.com")&&u.includes("/view"))return u.replace(/\/view(\?.*)?$/,"/preview");
+  return u;
+};
+
 R.kutubxona=(g,l,s)=>{g=+g;const list=(KITOBLAR[g]||{})[l];if(!list)return R.home();
   const lang=l==="ru"?"Rus tili":"O'zbek tili";
-  if(s){const b=list.find(x=>x[0]===s);if(!b)return `<section class="page">${back}<h2>Kitob topilmadi</h2><p class="mute">Bu fan ro'yxatda yo'q. Ortga qaytib, ro'yxatdan tanlang.</p></section>`;
-    return `<section class="page">${back}<h2>${g}-sinf · ${b[1]}</h2><p>${lang}</p><br><div class="card form"><button class="btn alt" id="up">PDF kitob yuklash</button><input type="file" id="pdf" accept="application/pdf" hidden><p class="err" id="msg"></p></div><div id="view"></div></section>`}
-  return `<section class="page">${back}<h2>${g}-sinf kitoblari</h2><p>${lang} · 2025–2026 o'quv yili</p><br><div class="grid">${list.map(b=>`<button class="sbtn" data-k="${g}-${l}-${b[0]}" data-go="kutubxona/${g}/${l}/${b[0]}">${b[1]}</button>`).join("")}</div></section>`};
+  if(s){const b=list.find(x=>x[0]===s);
+    if(!b)return `<section class="page"><button class="back" data-go="kutubxona/${g}/${l}">← Ortga</button><h2>Kitob topilmadi</h2><p class="mute">Bu fan ro'yxatda yo'q. Ortga qaytib, ro'yxatdan tanlang.</p></section>`;
+    const silka=b[2]||"";
+    const prev=drivePreview(silka);
+    return `<section class="page"><button class="back" data-go="kutubxona/${g}/${l}">← Ortga</button><h2>${g}-sinf · ${b[1]}</h2><p class="mute">${lang} · Darslik kitobi</p><br>
+    ${silka?`
+      <div class="card" style="margin-bottom:18px">
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px">
+          <a class="btn" href="${silka}" target="_blank" rel="noopener">📖 Kitobni ochish (yangi oynada)</a>
+          <button class="btn alt" id="copy-link" data-url="${silka}">Silkani nusxalash</button>
+        </div>
+        ${prev?`<iframe class="pdf" src="${prev}" title="${b[1]}" allow="autoplay"></iframe>`:""}
+      </div>
+    `:""}
+    <div id="view"></div>
+    <div class="card form" style="margin-top:20px">
+      <h3>Kitobni sozlash</h3>
+      <p class="mute" style="font-size:0.88rem;margin-bottom:14px">Kitob PDF silkasini (Google Drive, Telegram va h.k.) <b>malumotlar.js</b> fayliga yozib qo'ysangiz, kitob doimiy saqlanadi va hech qachon o'chib ketmaydi. Yoki serverga to'g'ridan-to'g'ri PDF yuklashingiz mumkin:</p>
+      <button class="btn alt" id="up">PDF kitob yuklash (serverga)</button>
+      <input type="file" id="pdf" accept="application/pdf" hidden>
+      <p class="err" id="msg"></p>
+    </div>
+    </section>`}
+  return `<section class="page">${back}<h2>${g}-sinf kitoblari</h2><p>${lang} · 2025–2026 o'quv yili</p><br>
+  <div class="book-grid">${list.map(b=>{
+    const silka=b[2]||"";
+    const key=`${g}-${l}-${b[0]}`;
+    return `<div class="bcard card" data-k="${key}">
+      <div class="bcard-top">
+        <span class="bcard-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span>
+        <div class="bcard-info">
+          <b>${b[1]}</b>
+          <span class="bcard-status ${silka?'ok':''}" id="st-${key}">${silka?'Kitob mavjud':'Ulanmagan'}</span>
+        </div>
+      </div>
+      <div class="bcard-actions">
+        ${silka?`<a class="btn bcard-btn" href="${silka}" target="_blank" rel="noopener">Kitobni ochish</a>`:`<button class="btn alt bcard-btn" id="btn-${key}" data-go="kutubxona/${g}/${l}/${b[0]}">Kitobni ochish</button>`}
+        <button class="btn alt bcard-more" data-go="kutubxona/${g}/${l}/${b[0]}">Ko'rish</button>
+      </div>
+    </div>`
+  }).join("")}</div></section>`};
 INIT.kutubxona=(g,l,s)=>{
-  if(!s){api("/api/books").then(h=>document.querySelectorAll(".sbtn[data-k]").forEach(b=>h.includes(b.dataset.k)&&b.classList.add("has"))).catch(()=>{});return}
+  if(!s){
+    api("/api/books").then(h=>{
+      document.querySelectorAll(".bcard[data-k]").forEach(card=>{
+        const k=card.dataset.k;
+        if(h.includes(k)){
+          const st=$("#st-"+k);if(st&&!st.classList.contains("ok")){st.textContent="PDF bor (serverda)";st.classList.add("ok")}
+          const btn=$("#btn-"+k);if(btn&&btn.tagName==="BUTTON"){
+            const a=document.createElement("a");
+            a.className="btn bcard-btn";
+            a.href="/pdf/"+k;
+            a.target="_blank";
+            a.textContent="Kitobni ochish";
+            btn.replaceWith(a);
+          }
+        }
+      });
+    }).catch(()=>{});
+    return;
+  }
   const key=`${g}-${l}-${s}`;
-  const show=async()=>{let have;try{have=await api("/api/books")}catch(e){have=null}const v=$("#view");if(!v)return;
-    if(!have){v.innerHTML=OFF;return}
-    if(!have.includes(key)){v.innerHTML='<div class="card">Bu kitob hali yuklanmagan.</div>';return}
-    const u=`/pdf/${key}?t=${Date.now()}`;
-    v.innerHTML=`<p><a class="btn" href="${u}" target="_blank">Yangi oynada ochish</a><a class="btn alt" href="/pdf/${key}" download="${s}.pdf">Yuklab olish</a></p><iframe class="pdf" src="${u}" title="Kitob"></iframe>`};
+  const cp=$("#copy-link");
+  if(cp)cp.onclick=()=>{navigator.clipboard.writeText(cp.dataset.url).then(()=>{cp.textContent="Nusxalandi! ✓";setTimeout(()=>cp.textContent="Silkani nusxalash",2000)}).catch(()=>{})};
+  const list=(KITOBLAR[g]||{})[l]||[];
+  const b=list.find(x=>x[0]===s);
+  const silka=b&&b[2];
+  const show=async()=>{
+    let have;try{have=await api("/api/books")}catch(e){have=null}
+    const v=$("#view");if(!v)return;
+    if(have&&have.includes(key)){
+      const u=`/pdf/${key}?t=${Date.now()}`;
+      v.innerHTML=`<div class="card" style="margin-bottom:18px"><div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px"><a class="btn" href="${u}" target="_blank">Yangi oynada ochish</a><a class="btn alt" href="/pdf/${key}" download="${s}.pdf">Yuklab olish</a></div><iframe class="pdf" src="${u}" title="Kitob"></iframe></div>`;
+    }else if(!silka){
+      v.innerHTML='<div class="card" style="margin-bottom:18px"><p class="mute">Serverda hozircha PDF saqlanmagan.</p></div>';
+    }
+  };
   show();
   $("#up").onclick=()=>$("#pdf").click();
   $("#pdf").onchange=e=>{const f=e.target.files[0];e.target.value="";if(!f)return;const m=$("#msg");
