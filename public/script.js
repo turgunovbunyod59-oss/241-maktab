@@ -3,7 +3,9 @@
 (function(){const slug=t=>String(t).toLowerCase().replace(/['’`ʻʼ]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,30).replace(/-+$/,"");
   for(const g in KITOBLAR)for(const l in KITOBLAR[g]){const seen={};
     KITOBLAR[g][l]=KITOBLAR[g][l].map((b,i)=>{const nom=typeof b[1]==="string"?b[1]:String(b[0]);let c=slug(typeof b[1]==="string"?b[0]:b[0])||"kitob-"+(i+1);
-      if(seen[c]){let n=2;while(seen[c+"-"+n])n++;c=c+"-"+n}seen[c]=1;return[c,nom]})}})();
+      if(seen[c]){let n=2;while(seen[c+"-"+n])n++;c=c+"-"+n}seen[c]=1;
+      const u=typeof b[2]==="string"?b[2].trim():"";
+      return[c,nom,u]})}})();
 const $=(s,r=document)=>r.querySelector(s),app=$("#app"),modal=$("#modal"),mb=$("#mbody");
 const esc=s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const ph=(src,cls,e="")=>`<span class="ph ${cls}" data-e="${e}"><img src="${src}" alt="" loading="lazy" onerror="this.remove()"></span>`;
@@ -28,7 +30,7 @@ function askPin(ok){
     if(rr&&rr.doimiy===false&&!window.__ew){window.__ew=1;setTimeout(()=>alert("DIQQAT: bu saytda doimiy saqlash (Supabase) ulanmagan.\n\nSiz kiritgan o'zgarishlar (hisoblagich, kitoblar, xabarlar, jadval va boshqalar) sayt uxlab qolgach yoki qayta ishga tushgach YO'QOLADI.\n\nREADME dagi \"Doimiy bepul saqlash: Supabase\" bo'limidagi qadamlarni bajaring."),80)}};
   $("#pok").onclick=go;$("#pin").onkeydown=e=>{if(e.key==="Enter")go()};
 }
-const grades=k=>open(`<h3>Sinfni tanlang</h3><div class="chips">${[5,6,7,8,9,10,11].map(g=>`<button class="btn alt" data-g="${g}" data-k="${k}">${g}-sinf</button>`).join("")}</div>`);
+const grades=k=>open(`<h3>Sinfni tanlang</h3><div class="chips sinf-chips">${[5,6,7,8,9,10,11].map(g=>`<button class="btn alt" data-g="${g}" data-k="${k}">${g}-sinf</button>`).join("")}</div>`);
 
 const R={},INIT={},KUNLAR=["Dushanba","Seshanba","Chorshanba","Payshanba","Juma","Shanba"];
 const MENU=[["haqida","Maktab haqida",'<path d="M3 21h18M5 21V10l7-5 7 5v11M9 21v-6h6v6"/><path d="M12 10h.01"/>',"Maktabimiz haqida batafsil ma'lumot"],
@@ -299,58 +301,54 @@ R.kutubxona=(g,l,s)=>{g=+g;const list=(KITOBLAR[g]||{})[l];if(!list)return R.hom
         <span class="bcard-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span>
         <div class="bcard-info">
           <b>${b[1]}</b>
-          <span class="bcard-status ${silka?'ok':''}" id="st-${key}">${silka?'Kitob mavjud':'Ulanmagan'}</span>
+          <span class="bcard-status ${silka?'ok':''}" id="st-${key}">${silka?'Kitob silkasi ulangan':'Silka hali ulanmagan'}</span>
         </div>
       </div>
       <div class="bcard-actions">
-        ${silka?`<a class="btn bcard-btn" href="${silka}" target="_blank" rel="noopener">Kitobni ochish</a>`:`<button class="btn alt bcard-btn" id="btn-${key}" data-go="kutubxona/${g}/${l}/${b[0]}">Kitobni ochish</button>`}
-        <button class="btn alt bcard-more" data-go="kutubxona/${g}/${l}/${b[0]}">Ko'rish</button>
+        ${silka?`<a class="btn bcard-btn" href="${silka}" target="_blank" rel="noopener">Kitobni ochish</a>`:`<button class="btn alt bcard-btn" id="btn-${key}" data-nosilka="${esc(b[1])}">Kitobni ochish</button>`}
       </div>
     </div>`
   }).join("")}</div></section>`};
 INIT.kutubxona=(g,l,s)=>{
-  if(!s){
-    api("/api/books").then(h=>{
-      document.querySelectorAll(".bcard[data-k]").forEach(card=>{
-        const k=card.dataset.k;
-        if(h.includes(k)){
-          const st=$("#st-"+k);if(st&&!st.classList.contains("ok")){st.textContent="PDF bor (serverda)";st.classList.add("ok")}
-          const btn=$("#btn-"+k);if(btn&&btn.tagName==="BUTTON"){
-            const a=document.createElement("a");
-            a.className="btn bcard-btn";
-            a.href="/pdf/"+k;
-            a.target="_blank";
-            a.textContent="Kitobni ochish";
-            btn.replaceWith(a);
-          }
+  api("/api/books").then(h=>{
+    document.querySelectorAll(".bcard[data-k]").forEach(card=>{
+      const k=card.dataset.k;
+      if(h.includes(k)){
+        const st=$("#st-"+k);if(st&&!st.classList.contains("ok")){st.textContent="Kitob bor (serverda)";st.classList.add("ok")}
+        const btn=$("#btn-"+k);if(btn&&btn.tagName==="BUTTON"){
+          const a=document.createElement("a");
+          a.className="btn bcard-btn";
+          a.href="/pdf/"+k;
+          a.target="_blank";
+          a.rel="noopener";
+          a.textContent="Kitobni ochish";
+          btn.replaceWith(a);
         }
+      }
+    });
+  }).catch(()=>{});
+  if(s){
+    const key=`${g}-${l}-${s}`;
+    const show=async()=>{
+      let have;try{have=await api("/api/books")}catch(e){have=null}
+      const v=$("#view");if(!v)return;
+      if(have&&have.includes(key)){
+        const u=`/pdf/${key}?t=${Date.now()}`;
+        v.innerHTML=`<div class="card" style="margin-bottom:18px"><div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px"><a class="btn" href="${u}" target="_blank">Yangi oynada ochish</a><a class="btn alt" href="/pdf/${key}" download="${s}.pdf">Yuklab olish</a></div><iframe class="pdf" src="${u}" title="Kitob"></iframe></div>`;
+      }
+    };
+    show();
+    $("#up").onclick=()=>$("#pdf").click();
+    $("#pdf").onchange=e=>{const f=e.target.files[0];e.target.value="";if(!f)return;const m=$("#msg");
+      if(f.type!=="application/pdf"&&!/\.pdf$/i.test(f.name)){m.textContent="Faqat PDF fayl yuklang.";return}
+      m.textContent="";
+      askPin(async pin=>{
+        m.className="";m.textContent="Yuklanmoqda…";
+        try{await api("/api/books/"+key,{method:"PUT",headers:{"X-Pin":pin},body:f});m.textContent="";await show()}catch(x){m.className="err";m.textContent=x.message}
       });
-    }).catch(()=>{});
-    return;
+    };
   }
-  const key=`${g}-${l}-${s}`;
-  const cp=$("#copy-link");
-  if(cp)cp.onclick=()=>{navigator.clipboard.writeText(cp.dataset.url).then(()=>{cp.textContent="Nusxalandi! ✓";setTimeout(()=>cp.textContent="Silkani nusxalash",2000)}).catch(()=>{})};
-  const list=(KITOBLAR[g]||{})[l]||[];
-  const b=list.find(x=>x[0]===s);
-  const silka=b&&b[2];
-  const show=async()=>{
-    let have;try{have=await api("/api/books")}catch(e){have=null}
-    const v=$("#view");if(!v)return;
-    if(have&&have.includes(key)){
-      const u=`/pdf/${key}?t=${Date.now()}`;
-      v.innerHTML=`<div class="card" style="margin-bottom:18px"><div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px"><a class="btn" href="${u}" target="_blank">Yangi oynada ochish</a><a class="btn alt" href="/pdf/${key}" download="${s}.pdf">Yuklab olish</a></div><iframe class="pdf" src="${u}" title="Kitob"></iframe></div>`;
-    }else if(!silka){
-      v.innerHTML='<div class="card" style="margin-bottom:18px"><p class="mute">Serverda hozircha PDF saqlanmagan.</p></div>';
-    }
-  };
-  show();
-  $("#up").onclick=()=>$("#pdf").click();
-  $("#pdf").onchange=e=>{const f=e.target.files[0];e.target.value="";if(!f)return;const m=$("#msg");
-    if(f.type!=="application/pdf"&&!/\.pdf$/i.test(f.name)){m.textContent="Faqat PDF fayl yuklang.";return}
-    m.textContent="";
-    askPin(async pin=>{m.className="";m.textContent="Yuklanmoqda…";
-      try{await api("/api/books/"+key,{method:"PUT",headers:{"X-Pin":pin},body:f});m.textContent="";await show()}catch(x){m.className="err";m.textContent=x.message}})}};
+};
 
 function route(){close();const[p,...a]=location.hash.slice(1).split("/").map(x=>{try{return decodeURIComponent(x)}catch(e){return x}});app.innerHTML=(R[p]||R.home)(...a);INIT[p]&&INIT[p](...a);scrollTo(0,0);if($("#cd")){CH.edit=false;loadChorak()}}
 addEventListener("hashchange",route);
@@ -387,7 +385,8 @@ document.addEventListener("click",e=>{const t=e.target,c=s=>t.closest(s);let x;
   if(c("[data-bells]"))return editBells();
   if(x=c("[data-tab]")){JS.tab=+x.dataset.tab;if(JS.edit)return drawJ();document.querySelectorAll(".tab").forEach((b,i)=>b.classList.toggle("on",i==x.dataset.tab));document.querySelectorAll(".tabp").forEach((b,i)=>b.hidden=i!=x.dataset.tab);return}
   if(c("[data-map]"))return open(`<h3>Maktab xaritada</h3><iframe src="https://maps.google.com/maps?q=${S.map}&z=17&output=embed" title="Xarita" loading="lazy"></iframe><p style="margin-top:12px"><a class="btn" href="https://www.google.com/maps?q=${S.map}" target="_blank" rel="noopener">Google Maps'da ochish</a></p>`);
-  if(x=c("[data-g]")){const g=x.dataset.g;return x.dataset.k==="jadval"?(close(),location.hash="jadval/"+g):open(`<h3>${g}-sinf: tilni tanlang</h3><div class="chips"><button class="btn alt" data-go="kutubxona/${g}/uz">O'zbek tili</button><button class="btn alt" data-go="kutubxona/${g}/ru">Rus tili</button></div>`)}
+  if(x=c("[data-nosilka]"))return alert(`«${x.dataset.nosilka}» fani uchun kitob silkasi hali ulanmagan.\n\nSilka ulash uchun public/malumotlar.js faylini ochib, «${x.dataset.nosilka}» qatoriga kitob PDF silkasini yozib qo'ying.`);
+  if(x=c("[data-g]")){const g=x.dataset.g;return x.dataset.k==="jadval"?(close(),location.hash="jadval/"+g):open(`<h3>${g}-sinf: tilni tanlang</h3><div class="chips til-chips"><button class="btn alt" data-go="kutubxona/${g}/uz">O'zbek tili</button><button class="btn alt" data-go="kutubxona/${g}/ru">Rus tili</button></div>`)}
   if(x=c("[data-m]")){const m=x.dataset.m;return m==="jadval"||m==="kutubxona"?grades(m):location.hash=m}
   if(x=c("[data-go]")){close();location.hash=x.dataset.go}});
 

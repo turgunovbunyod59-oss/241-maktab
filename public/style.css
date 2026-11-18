@@ -1329,22 +1329,19 @@ input:focus, textarea:focus {
 }
 .bcard-actions {
   display: flex;
-  gap: 8px;
-  align-items: center;
+  width: 100%;
 }
 .bcard-btn {
-  flex: 1;
+  width: 100%;
   text-align: center;
-  padding: 9px 14px;
-  font-size: 0.88rem;
+  padding: 10px 16px;
+  font-size: 0.92rem;
   margin: 0 !important;
   white-space: nowrap;
   text-decoration: none;
-}
-.bcard-more {
-  padding: 9px 14px;
-  font-size: 0.85rem;
-  margin: 0 !important;
+  display: block;
+  border-radius: 999px;
+  box-sizing: border-box;
 }
 .pdf {
   display: block;
@@ -1397,8 +1394,55 @@ input:focus, textarea:focus {
 .x:hover { color: var(--head); }
 .chips {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 4px 2px 8px;
+  scrollbar-width: thin;
+}
+.chips::-webkit-scrollbar {
+  height: 4px;
+}
+.chips::-webkit-scrollbar-thumb {
+  background: var(--acc);
+  border-radius: 4px;
+}
+.chips .btn, .chips button {
+  flex-shrink: 0;
+  padding: 9px 16px;
+  font-size: 0.92rem;
+  white-space: nowrap;
+  margin: 0 !important;
+}
+
+.til-chips {
+  display: flex;
+  flex-direction: row;
   gap: 10px;
+  overflow-x: visible;
+}
+.til-chips button {
+  flex: 1;
+  text-align: center;
+}
+
+.sinf-chips {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 8px;
+  padding: 6px 2px 10px;
+  -webkit-overflow-scrolling: touch;
+}
+.sinf-chips button {
+  flex-shrink: 0;
+  padding: 9px 15px;
+  font-size: 0.92rem;
+  border-radius: 999px;
+  white-space: nowrap;
 }
 .box iframe {
   width: 100%;
@@ -1701,6 +1745,37 @@ input:focus, textarea:focus {
   .foot-brand {
     flex-direction: column;
     text-align: center;
+  }
+  .box {
+    padding: 24px 16px 20px;
+    width: min(420px, 94vw);
+    border-radius: 20px;
+  }
+  .box h3 {
+    font-size: 1.2rem;
+    margin-bottom: 14px;
+  }
+  .sinf-chips {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 8px;
+    padding-bottom: 8px;
+  }
+  .sinf-chips button {
+    flex-shrink: 0;
+    padding: 9px 13px;
+    font-size: 0.88rem;
+  }
+  .tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 6px;
+  }
+  .tabs .tab, .tabs .tabw {
+    flex-shrink: 0;
   }
 }
 
