@@ -3,6 +3,7 @@
 // Saqlash ikki xil: (1) SUPABASE_URL va SUPABASE_KEY berilsa — Supabase Storage (bepul, doimiy);
 // (2) berilmasa — shu kompyuterdagi "data" papkasi (sinash uchun).
 const http=require("http"),fs=require("fs"),path=require("path"),crypto=require("crypto"),{Readable}=require("stream");
+try{const envP=path.join(__dirname,".env");if(fs.existsSync(envP)){for(const l of fs.readFileSync(envP,"utf8").split(/\r?\n/)){const m=l.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)?\s*$/);if(m&&process.env[m[1]]===undefined){process.env[m[1]]=m[2].trim().replace(/^['"](.*)['"]$/,"$1")}}}}catch(e){}
 const PORT=+process.env.PORT||3000, PIN=process.env.MAKTAB_PIN||"maktab";
 const SB_URL=(process.env.SUPABASE_URL||"").trim().replace(/\/+$/,""), SB_KEY=(process.env.SUPABASE_KEY||"").trim(), SB_BUCKET=(process.env.SUPABASE_BUCKET||"maktab").trim();
 const REMOTE=!!(SB_URL&&SB_KEY);
@@ -24,7 +25,7 @@ const notFound=res=>{res.writeHead(404,{"Content-Type":"text/plain; charset=utf-
 const storageErr=(msg)=>Object.assign(new Error(msg),{code:502});
 
 /* ---------- Saqlash: Supabase yoki lokal papka ---------- */
-const hdr=()=>{const h={apikey:SB_KEY,"Accept-Encoding":"identity"};if(SB_KEY.startsWith("eyJ"))h.Authorization="Bearer "+SB_KEY;return h};
+const hdr=()=>{const h={apikey:SB_KEY,Authorization:"Bearer "+SB_KEY,"Accept-Encoding":"identity"};return h};
 const objUrl=p=>`${SB_URL}/storage/v1/object/${encodeURIComponent(SB_BUCKET)}/${p.split("/").map(encodeURIComponent).join("/")}`;
 const rGet=(p,range)=>fetch(objUrl(p),{headers:{...hdr(),...(range?{Range:range}:{})}});
 async function rPut(p,buf,type){
