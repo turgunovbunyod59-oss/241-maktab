@@ -14,7 +14,7 @@ const PUB=path.join(__dirname,"public"), DATA=process.env.DATA_DIR||path.join(__
 const UP=path.join(DATA,"uploads"), PDF=path.join(DATA,"pdf");
 if(!REMOTE) for(const d of [UP,PDF]) fs.mkdirSync(d,{recursive:true});
 const MAX_PDF=(REMOTE?50:150)*2**20, MAX_JSON=6*2**20, KEY=/^(5|6|7|8|9|10|11)-(uz|ru)-[a-z0-9]+(-[a-z0-9]+)*$/;
-const MIME={".html":"text/html; charset=utf-8",".css":"text/css; charset=utf-8",".js":"text/javascript; charset=utf-8",".png":"image/png",".jpg":"image/jpeg",".jpeg":"image/jpeg",".webp":"image/webp",".svg":"image/svg+xml",".ico":"image/x-icon",".pdf":"application/pdf"};
+const MIME={".html":"text/html; charset=utf-8",".css":"text/css; charset=utf-8",".js":"text/javascript; charset=utf-8",".png":"image/png",".jpg":"image/jpeg",".jpeg":"image/jpeg",".webp":"image/webp",".svg":"image/svg+xml",".ico":"image/x-icon",".pdf":"application/pdf",".xml":"application/xml; charset=utf-8",".txt":"text/plain; charset=utf-8"};
 
 const json=(res,code,obj)=>{if(res.headersSent)return;res.writeHead(code,{"Content-Type":"application/json; charset=utf-8","Cache-Control":"no-store"});res.end(JSON.stringify(obj))};
 const id=()=>crypto.randomBytes(8).toString("hex");
