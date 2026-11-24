@@ -1,2 +1,4 @@
 User-agent: *
 Allow: /
+
+Sitemap: https://two41-maktab.onrender.com/sitemap.xml
